@@ -1,10 +1,10 @@
 from __future__ import print_function
 import csv, multiprocessing, cv2, os
 import numpy as np
-import urllib
+import urllib.request
 
 def url_to_image(url):
-    resp = urllib.urlopen(url)
+    resp = urllib.request.urlopen(url)
     image = np.asarray(bytearray(resp.read()), dtype="uint8")
     image = cv2.imdecode(image, cv2.IMREAD_UNCHANGED)
     return image
@@ -23,28 +23,29 @@ def download_and_resize(imList):
                 img = url_to_image(im[4])
                 if img.shape[1] > img.shape[0]:
                     width = 640
-                    height = (640 * img.shape[0]) / img.shape[1]
+                    height = (640 * img.shape[0]) // img.shape[1]
                     img = cv2.resize(img,(width, height))
                 else:
                     height = 640
-                    width = (640 * img.shape[1]) / img.shape[0]
+                    width = (640 * img.shape[1]) // img.shape[0]
                     img = cv2.resize(img,(width, height))
                 cv2.imwrite(savePath,img)
                 print('Good: ' + savePath)
             else:
                 print('Already saved: ' + savePath)
-        except:
+        except Exception as e:
+            print(e)
             print('Bad: ' + savePath)
 
 def main():
-    hotel_f = open('./input/dataset/hotel_info.csv','rb')
+    hotel_f = open('./input/dataset/hotel_info.csv','r')
     hotel_reader = csv.reader(hotel_f)
     hotel_headers = next(hotel_reader,None)
     hotel_to_chain = {}
     for row in hotel_reader:
         hotel_to_chain[row[0]] = row[2]
 
-    train_f = open('./input/dataset/train_set.csv','rb')
+    train_f = open('./input/dataset/train_set.csv','r')
     train_reader = csv.reader(train_f)
     train_headers = next(train_reader,None)
 
